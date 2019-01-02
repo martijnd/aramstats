@@ -3,36 +3,46 @@
     <h1>ARAMStats</h1>
     <input
       type="text"
-      @change="fetchData"
+      @change="getUserInfo"
       v-model="username"
     >
+    <h2>{{ accountId }}</h2>
 
   </div>
 </template>
 
 <script>
+const axios = require("axios");
+
 export default {
   name: "Dashboard",
   data() {
     return {
       API_KEY: process.env.VUE_APP_API_KEY,
-      API_URL:
-        "https://euw1.api.riotgames.com/lol/summoner/v3/summoners/by-name/",
-      username: ""
+      ACCOUNT_URL: `http://localhost:8080/lol/summoner/v4/summoners/by-name/`,
+      MATCH_URL: "`http://localhost:8080/lol/match/v4/matchlists/by-account/",
+      locale: "?platform=EUW1",
+      username: "",
+      accountId: null
     };
   },
   methods: {
-    fetchData: function() {
-      const axios = require("axios");
-
+    getUserInfo: function() {
       axios
-        .get(this.API_URL + this.username + this.API_KEY)
+        .get(this.ACCOUNT_URL + this.username + this.locale)
         .then(response => {
           console.log(response);
+          this.accountId = response.data.accountId;
+          this.setUserMatchInfo(this.accountId);
         })
         .catch(error => {
           console.log(error);
         });
+    },
+    setUserMatchInfo: function(accountId) {
+      axios.get(this.MATCH_URL + accountId + this.locale).then(response => {
+        console.log(response);
+      });
     }
   },
 
